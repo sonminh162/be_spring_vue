@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/")
+@RequestMapping("/user")
 public class UserResource {
 
     @Autowired
@@ -26,14 +26,23 @@ public class UserResource {
      -- them log sau khi hoan thanh
      -- check dieu kien dau vao, dau ra dung chuan chua
      -- moi 1 dong tac deu co muc dich di kem, ko viet code minh ko hieu sau can ke
-     -- tim cach base hoa module,
+     -- tim cach base hoa module, them truong code vao cac entity roi format
      */
 
-    @PostMapping("/user/create")
-    public UserEntity createUserApi(@RequestBody UserEntity userEntity,
+    @PostMapping("/create")
+    public UserEntity createUserAndModifyParticipant(@RequestBody UserEntity userEntity,
                                     @RequestParam(value = "permissionIds", required = false) List<Long> permissionIds,
                                     @RequestParam(value = "groupIds", required = false) List<Long> groupIds) {
         return userService.createUser(userEntity, permissionIds, groupIds);
+    }
+
+    @PostMapping("/update")
+    public UserEntity updateUserAndModifyParticipant(@RequestParam(value = "userId") Long id,
+                                                     @RequestParam(value = "username", required = false) String username,
+                                                     @RequestParam(value = "password", required = false) String password,
+                                                     @RequestParam(value = "permissionIds", required = false) List<Long> permissionIds,
+                                                     @RequestParam(value = "groupIds", required = false) List<Long> groupIds) {
+        return userService.updateUser(id, username, password, permissionIds, groupIds);
     }
 
 }

@@ -16,7 +16,6 @@ public class UserEntity extends BaseEntity {
     private String username;
     private String password;
 
-
     @Basic
     @Column(name = "username")
     public String getUsername() {

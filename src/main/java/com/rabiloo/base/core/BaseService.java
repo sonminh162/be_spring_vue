@@ -27,6 +27,8 @@ public abstract class BaseService<E extends BaseEntity, R extends BaseRepository
         return repository.findByIdInAndIsDeletedFalse(ids);
     }
 
+
+
     public void preSave(E entity) {
         if(entity.getId() == null) {
             entity.setCreatedTime(new Date());
