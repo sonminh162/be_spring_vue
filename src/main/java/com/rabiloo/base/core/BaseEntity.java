@@ -1,4 +1,4 @@
-package com.example.demo.model;
+package com.rabiloo.base.core;
 
 
 import lombok.Getter;

@@ -1,8 +1,6 @@
-package com.example.demo.model;
+package com.rabiloo.custom.entity;
 
 import javax.persistence.*;
-import java.sql.Timestamp;
-import java.util.Objects;
 
 @Entity
 @Table(name = "user_policy_participant", schema = "mydb")

@@ -1,10 +1,16 @@
-package com.example.demo.model;
+package com.rabiloo.custom.entity;
+
+import com.rabiloo.base.core.BaseEntity;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import javax.persistence.*;
-import java.sql.Timestamp;
-import java.util.Objects;
 
 @Entity
+@Getter
+@Setter
+@NoArgsConstructor
 @Table(name = "user", schema = "mydb")
 public class UserEntity extends BaseEntity {
     private String username;

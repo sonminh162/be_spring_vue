@@ -1,4 +1,4 @@
-package com.example.demo.model;
+package com.rabiloo.custom.entity;
 
 import javax.persistence.Basic;
 import javax.persistence.Column;
