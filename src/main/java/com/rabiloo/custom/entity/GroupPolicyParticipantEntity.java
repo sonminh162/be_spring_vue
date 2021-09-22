@@ -1,5 +1,7 @@
 package com.rabiloo.custom.entity;
 
+import com.rabiloo.base.core.BaseEntity;
+
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;

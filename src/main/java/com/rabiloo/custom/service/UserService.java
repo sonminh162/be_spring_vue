@@ -24,6 +24,9 @@ public class UserService extends BaseService<UserEntity, UserRepository> {
     @Autowired
     UserGroupService userGroupService;
 
+    @Autowired
+    GroupPolicyService groupPolicyService;
+
     private void assignPermission(UserEntity userEntity, List<Long> permissionIds) {
         List<PermissionPolicyEntity> assignedPermissionEntities = permissionService.findByIdInAndDeletedFalse(permissionIds);
         for(PermissionPolicyEntity permissionPolicyEntity : assignedPermissionEntities) {
@@ -36,9 +39,16 @@ public class UserService extends BaseService<UserEntity, UserRepository> {
         for(GroupEntity groupEntity : assignedGroupEntities) {
             userGroupService.save(new UserGroupParticipantEntity(userEntity.getId(), groupEntity.getId(), userEntity.getUsername(), groupEntity.getName()));
         }
+
+        assignPermissionsByGroup(userEntity.getId(), groupIds);
     }
 
-    public UserEntity createUser(UserEntity userEntity, List<Long> permissionIds, List<Long> groupIds) {
+    private void assignPermissionsByGroup(Long userId, List<Long> groupIds) {
+        // PAUSE 2
+        List<Long> permissionIdsByGroupIds = groupPolicyService.findAll
+    }
+
+    public UserEntity createUserAndModifyParticipant(UserEntity userEntity, List<Long> permissionIds, List<Long> groupIds) {
         UserEntity createdUser = save(userEntity);
         if(permissionIds != null) {
             assignPermission(createdUser, permissionIds);
@@ -49,7 +59,15 @@ public class UserService extends BaseService<UserEntity, UserRepository> {
         return createdUser;
     }
 
-    public UserEntity updateUser(Long id, String username, String password, List<Long> permissionIds, List<Long> groupIds) {
+    public void clearPermission(Long userId) {
+        userPolicyService.deleteParticipantsByUserId(userId);
+    }
+
+    public void clearGroup(Long userId) {
+        userGroupService.deleteParticipantsByUserId(userId);
+    }
+
+    public UserEntity updateUserAndModifyParticipant(Long id, String username, String password, List<Long> permissionIds, List<Long> groupIds) {
         Optional<UserEntity> updatingUserOptional = repository.findByIdAndIsDeletedFalse(id);
 
         if(updatingUserOptional.isPresent()) {
@@ -58,10 +76,12 @@ public class UserService extends BaseService<UserEntity, UserRepository> {
             updatingUser.setPassword(password == null ? updatingUser.getPassword() : password);
 
             if(permissionIds != null) {
+                clearPermission(updatingUser.getId());
                 assignPermission(updatingUser, permissionIds);
             }
 
             if(groupIds != null) {
+                clearGroup(updatingUser.getId());
                 assignGroup(updatingUser, groupIds);
             }
             return updatingUser;
@@ -69,14 +89,13 @@ public class UserService extends BaseService<UserEntity, UserRepository> {
         return null;
     }
 
-    public boolean deleteUser(Long id) {
+    public boolean deleteUserAndModifyParticipant(Long id) {
         Optional<UserEntity> deletingUserOptional = repository.findByIdAndIsDeletedFalse(id);
         if(deletingUserOptional.isPresent()) {
             UserEntity deletingUser = deletingUserOptional.get();
-//            PAUSE
-//            userPolicyService.deleteParticipantsByUserId(deletingUser.getId());
-//            userGroupService.deleteParticipantsByUserId(deletingUser.getId());
-//            deletingUser.isDeleted()
+            userPolicyService.deleteParticipantsByUserId(deletingUser.getId());
+            userGroupService.deleteParticipantsByUserId(deletingUser.getId());
+            return deleteEntity(deletingUser);
         }
         return false;
     }
