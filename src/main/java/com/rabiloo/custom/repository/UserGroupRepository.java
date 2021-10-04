@@ -7,4 +7,8 @@ import java.util.List;
 
 public interface UserGroupRepository extends BaseRepository<UserGroupParticipantEntity> {
     List<UserGroupParticipantEntity> findAllByUserIdAndIsDeletedFalse(Long userId);
+
+    List<UserGroupParticipantEntity> findAllByGroupIdAndIsDeletedFalse(Long groupId);
+
+    List<UserGroupParticipantEntity> findByGroupIdAndIsDeletedFalse(Long groupId);
 }

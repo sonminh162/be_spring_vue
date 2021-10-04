@@ -1,12 +1,10 @@
 package com.rabiloo.base.core;
 
+import com.rabiloo.custom.exception.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 @Service
 public abstract class BaseService<E extends BaseEntity, R extends BaseRepository<E>> {
@@ -26,6 +24,29 @@ public abstract class BaseService<E extends BaseEntity, R extends BaseRepository
 
     public List<E> findByIdInAndDeletedFalse(Collection<Long> ids) {
         return repository.findByIdInAndIsDeletedFalse(ids);
+    }
+
+    public E findByCodeAndIsDeleteFalse(UUID code) {
+        return repository.findByCodeAndIsDeletedFalse(code).orElseThrow(()-> new ResourceNotFoundException(""));
+    }
+
+    public Optional<E> findByIdAndDeletedFalse(Long id) {
+        return repository.findByIdAndIsDeletedFalse(id);
+    }
+
+    public List<E> saveList(List<E> entities) {
+        if (entities == null || entities.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        List<E> entitiesToSave = new ArrayList<>();
+        for (E entity : entities) {
+            if (entity != null) {
+                preSave(entity);
+                entitiesToSave.add(entity);
+            }
+        }
+        return repository.saveAll(entitiesToSave);
     }
 
     public boolean deleteEntity(E entity) {

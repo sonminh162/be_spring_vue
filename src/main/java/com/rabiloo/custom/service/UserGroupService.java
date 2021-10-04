@@ -14,4 +14,13 @@ public class UserGroupService extends BaseService<UserGroupParticipantEntity, Us
         return deleteList(deletingEntities);
     }
 
+    public List<UserGroupParticipantEntity> findAllByGroupId(Long groupId) {
+        return repository.findByGroupIdAndIsDeletedFalse(groupId);
+    }
+
+    public boolean deleteParticipantsByGroupId(Long groupId) {
+        List<UserGroupParticipantEntity> deletingEntities = repository.findAllByGroupIdAndIsDeletedFalse(groupId);
+        return deleteList(deletingEntities);
+    }
+
 }

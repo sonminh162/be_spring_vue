@@ -25,6 +25,11 @@ public class UserPolicyParticipantEntity extends BaseEntity {
         this.userName = userName;
     }
 
+    public UserPolicyParticipantEntity(Long userId, Long policyId) {
+        this.userId = userId;
+        this.policyId = policyId;
+    }
+
     @Basic
     @Column(name = "user_id")
     public Long getUserId() {

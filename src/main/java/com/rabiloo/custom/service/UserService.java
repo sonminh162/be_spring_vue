@@ -6,8 +6,11 @@ import com.rabiloo.custom.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class UserService extends BaseService<UserEntity, UserRepository> {
@@ -44,8 +47,15 @@ public class UserService extends BaseService<UserEntity, UserRepository> {
     }
 
     private void assignPermissionsByGroup(Long userId, List<Long> groupIds) {
-        // PAUSE 2
-        List<Long> permissionIdsByGroupIds = groupPolicyService.findAll
+
+        List<GroupPolicyParticipantEntity> participantsByGroup = groupPolicyService.findAllByGroupIdInAndIsDeletedFalse(groupIds);
+        List<Long> permissionIdsByGroup = participantsByGroup.stream().map(GroupPolicyParticipantEntity::getPolicyId).collect(Collectors.toList());
+        List<Long> permissionIdByGroupsNoDuplicate = new ArrayList<>(new HashSet<>(permissionIdsByGroup));
+        List<Long> permissionIdsByUser = permissionService.findAllByUserId(userId).stream().map(PermissionPolicyEntity::getId).collect(Collectors.toList());
+        List<Long> assigningPermissionIds = permissionIdByGroupsNoDuplicate.stream().filter(permissionIdByGroup -> !permissionIdsByUser.contains(permissionIdByGroup)).collect(Collectors.toList());
+        Optional<UserEntity> assigningUserOptional = findByIdAndDeletedFalse(userId);
+        assigningUserOptional.ifPresent(userEntity -> assignPermission(userEntity, assigningPermissionIds));
+
     }
 
     public UserEntity createUserAndModifyParticipant(UserEntity userEntity, List<Long> permissionIds, List<Long> groupIds) {
@@ -98,5 +108,9 @@ public class UserService extends BaseService<UserEntity, UserRepository> {
             return deleteEntity(deletingUser);
         }
         return false;
+    }
+
+    public List<UserEntity> findByGroupId(Long groupId) {
+        return repository.findByGroupIdAndIsDeletedFalse(groupId);
     }
 }

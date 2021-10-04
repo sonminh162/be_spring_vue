@@ -22,7 +22,6 @@ public interface BaseRepository <E extends BaseEntity> extends PagingAndSortingR
 
     List<E> findByIdInAndIsDeletedFalse(Collection<Long> id);
 
-
     Optional<E> findByCodeAndIsDeletedFalse(UUID code);
 
     List<E> findByIdInAndIsDeletedFalse(List<Long> ids);
