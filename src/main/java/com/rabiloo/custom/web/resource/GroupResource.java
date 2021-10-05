@@ -32,9 +32,8 @@ public class GroupResource extends BaseResource<GroupService> {
         return service.deleteGroupByCodeAndModifyParticipants(groupCode);
     }
 
-
-//    @GetMapping("/") DOING
-//    public List<GroupDto> getList() {
-//        return service.getGroupList();
-//    }
+    @GetMapping("/")
+    public List<GroupDto> getList() {
+        return service.getGroupList();
+    }
 }

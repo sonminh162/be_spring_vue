@@ -3,6 +3,7 @@ package com.rabiloo.custom.service;
 import com.rabiloo.base.core.BaseService;
 import com.rabiloo.custom.dto.group.GroupDto;
 import com.rabiloo.custom.entity.*;
+import com.rabiloo.custom.entity.permission.PermissionPolicyEntity;
 import com.rabiloo.custom.entity.user.UserEntity;
 import com.rabiloo.custom.repository.GroupRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +27,9 @@ public class GroupService extends BaseService<GroupEntity, GroupRepository> {
 
     @Autowired
     UserPolicyService userPolicyService;
+
+    @Autowired
+    PermissionService permissionService;
 
     private void addUsersToNewGroup(List<Long> userIds, GroupEntity groupEntity) {
         List<UserEntity> assignedUsers = userService.findByIdInAndDeletedFalse(userIds);
@@ -87,28 +91,31 @@ public class GroupService extends BaseService<GroupEntity, GroupRepository> {
     }
 
     public GroupEntity updateAndModifyParticipants(GroupDto requestBody, List<Long> newUserIds, List<Long> permissionIds) {
-        GroupEntity updatingGroup = findByCodeAndIsDeleteFalse(requestBody.getCode());
-        if(newUserIds != null) {
-            Set<Long> intersectUserGroupParticipantIds = userGroupService.findAllByGroupId(updatingGroup.getId())
-                    .stream()
-                    .map(UserGroupParticipantEntity::getUserId).collect(Collectors.toSet());
-            intersectUserGroupParticipantIds.retainAll(newUserIds);
-            List<Long> updatingIds = newUserIds.stream().filter(id -> !intersectUserGroupParticipantIds.contains(id)).collect(Collectors.toList());
-            assignPermissionOfGroupToNewUsers(updatingIds, updatingGroup.getId());
-        }
+        Optional<GroupEntity> updatingGroupOptional = findByIdAndDeletedFalse(requestBody.getId());
+        if(updatingGroupOptional.isPresent()){
+            GroupEntity updatingGroup = updatingGroupOptional.get();
+            if(newUserIds != null) {
+                Set<Long> intersectUserGroupParticipantIds = userGroupService.findAllByGroupId(updatingGroup.getId())
+                        .stream()
+                        .map(UserGroupParticipantEntity::getUserId).collect(Collectors.toSet());
+                intersectUserGroupParticipantIds.retainAll(newUserIds);
+                List<Long> updatingIds = newUserIds.stream().filter(id -> !intersectUserGroupParticipantIds.contains(id)).collect(Collectors.toList());
+                assignPermissionOfGroupToNewUsers(updatingIds, updatingGroup.getId());
+            }
 
-        if(permissionIds != null) {
-            Set<Long> intersectGroupPolicyParticipantIds = groupPolicyService.findByGroupIdAndIsDeletedFalse(updatingGroup.getId())
-                    .stream()
-                    .map(GroupPolicyParticipantEntity::getPolicyId)
-                    .collect(Collectors.toSet());
-            intersectGroupPolicyParticipantIds.retainAll(newUserIds);
-            List<Long> updatingPermissionIds = newUserIds.stream().filter(id -> !intersectGroupPolicyParticipantIds.contains(id)).collect(Collectors.toList());
-            assignNewPermissionToGroup(updatingPermissionIds, updatingGroup.getId());
-            assignNewPermissionToUserOfGroup(updatingPermissionIds, updatingGroup.getId());
+            if(permissionIds != null) {
+                Set<Long> intersectGroupPolicyParticipantIds = groupPolicyService.findByGroupIdAndIsDeletedFalse(updatingGroup.getId())
+                        .stream()
+                        .map(GroupPolicyParticipantEntity::getPolicyId)
+                        .collect(Collectors.toSet());
+                intersectGroupPolicyParticipantIds.retainAll(newUserIds);
+                List<Long> updatingPermissionIds = newUserIds.stream().filter(id -> !intersectGroupPolicyParticipantIds.contains(id)).collect(Collectors.toList());
+                assignNewPermissionToGroup(updatingPermissionIds, updatingGroup.getId());
+                assignNewPermissionToUserOfGroup(updatingPermissionIds, updatingGroup.getId());
+            }
+            return getUpdatedAttributesGroup(requestBody, updatingGroup);
         }
-
-        return getUpdatedAttributesGroup(requestBody, updatingGroup);
+        return null;
     }
 
     private void assignNewPermissionToGroup(List<Long> updatingPermissionIds, Long groupId) {
@@ -141,8 +148,31 @@ public class GroupService extends BaseService<GroupEntity, GroupRepository> {
         return true;
     }
 
-//    public List<GroupDto> getGroupList() {
-//
-//    }
+    public List<GroupDto> getGroupList() {
+        List<GroupEntity> groupEntities = repository.findByIsDeletedFalse();
+        List<GroupDto> results = new ArrayList<>();
+        for(GroupEntity groupEntity : groupEntities) {
+            GroupDto result = new GroupDto(groupEntity);
+            result.setPermissions(getPermissionByGroupId(groupEntity.getId()));
+            result.setNumberUsers(getNumberUsersByGroupId(groupEntity.getId()));
+            results.add(result);
+        }
+        return results;
+    }
+
+    private List<String> getPermissionByGroupId(Long groupId) {
+        List<Long> permissionIds = groupPolicyService.findByGroupIdAndIsDeletedFalse(groupId)
+                .stream()
+                .map(GroupPolicyParticipantEntity::getPolicyId).collect(Collectors.toList());
+        List<String> permissions = permissionService.findByIdInAndDeletedFalse(permissionIds)
+                .stream()
+                .map(PermissionPolicyEntity::getName).collect(Collectors.toList());
+        return permissions;
+    }
+
+    private int getNumberUsersByGroupId(Long groupId) {
+        // maybe trùng, handle sau
+        return userGroupService.findAllByGroupId(groupId).size();
+    }
 
 }
