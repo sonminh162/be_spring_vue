@@ -22,4 +22,8 @@ public class GroupPolicyService extends BaseService<GroupPolicyParticipantEntity
         return repository.findByGroupIdAndIsDeletedFalse(groupId);
     }
 
+    public List<GroupPolicyParticipantEntity> findByPermissionId(Long permissionId) {
+        return repository.findByPermissionIdAndIsDeletedFalse(permissionId);
+    }
+
 }

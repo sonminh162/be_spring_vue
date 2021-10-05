@@ -1,4 +1,4 @@
-package com.rabiloo.custom.entity;
+package com.rabiloo.custom.entity.user;
 
 import com.rabiloo.base.core.BaseEntity;
 import lombok.Getter;

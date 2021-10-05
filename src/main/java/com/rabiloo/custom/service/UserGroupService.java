@@ -6,6 +6,7 @@ import com.rabiloo.custom.repository.UserGroupRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class UserGroupService extends BaseService<UserGroupParticipantEntity, UserGroupRepository> {
@@ -21,6 +22,12 @@ public class UserGroupService extends BaseService<UserGroupParticipantEntity, Us
     public boolean deleteParticipantsByGroupId(Long groupId) {
         List<UserGroupParticipantEntity> deletingEntities = repository.findAllByGroupIdAndIsDeletedFalse(groupId);
         return deleteList(deletingEntities);
+    }
+
+    public List<String> getGroupNamesByUserId(Long userId) {
+        return repository.findAllByUserIdAndIsDeletedFalse(userId)
+                .stream()
+                .map(UserGroupParticipantEntity::getGroupName).collect(Collectors.toList());
     }
 
 }

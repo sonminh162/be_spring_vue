@@ -1,10 +1,14 @@
 package com.rabiloo.custom.service;
 
 import com.rabiloo.base.core.BaseService;
+import com.rabiloo.custom.dto.user.UserDto;
 import com.rabiloo.custom.entity.*;
+import com.rabiloo.custom.entity.permission.PermissionPolicyEntity;
+import com.rabiloo.custom.entity.user.UserEntity;
 import com.rabiloo.custom.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -99,6 +103,7 @@ public class UserService extends BaseService<UserEntity, UserRepository> {
         return null;
     }
 
+    @Transactional
     public boolean deleteUserAndModifyParticipant(Long id) {
         Optional<UserEntity> deletingUserOptional = repository.findByIdAndIsDeletedFalse(id);
         if(deletingUserOptional.isPresent()) {
@@ -112,5 +117,18 @@ public class UserService extends BaseService<UserEntity, UserRepository> {
 
     public List<UserEntity> findByGroupId(Long groupId) {
         return repository.findByGroupIdAndIsDeletedFalse(groupId);
+    }
+
+    public List<UserDto> getUserList() {
+        List<UserEntity> userEntities = repository.findByIsDeletedFalse();
+        List<UserDto> resultList = new ArrayList<>();
+        for(UserEntity userEntity : userEntities) {
+            UserDto result = new UserDto();
+            result.setName(userEntity.getUsername());
+            result.setGroups(userGroupService.getGroupNamesByUserId(userEntity.getId()));
+            result.setPolicies(userPolicyService.getPolicyNamesByUserId(userEntity.getId()));
+            resultList.add(result);
+        }
+        return resultList;
     }
 }

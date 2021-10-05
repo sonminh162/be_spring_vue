@@ -1,18 +1,17 @@
-package com.rabiloo.custom.entity;
+package com.rabiloo.custom.entity.permission;
 
 import com.rabiloo.base.core.BaseEntity;
+import com.rabiloo.custom.entity.permission.enums.ActionType;
 
-import javax.persistence.Basic;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 @Entity
 @Table(name = "permission_policy", schema = "mydb")
 public class PermissionPolicyEntity extends BaseEntity {
     private String name;
     private String description;
-    private String action;
+    @Enumerated(EnumType.STRING)
+    private ActionType action;
     private String resourceType;
     private String resourceId;
 
@@ -38,11 +37,11 @@ public class PermissionPolicyEntity extends BaseEntity {
 
     @Basic
     @Column(name = "action")
-    public String getAction() {
+    public ActionType getAction() {
         return action;
     }
 
-    public void setAction(String action) {
+    public void setAction(ActionType action) {
         this.action = action;
     }
 

@@ -1,7 +1,7 @@
 package com.rabiloo.custom.web.resource;
 
 import com.rabiloo.base.core.BaseResource;
-import com.rabiloo.custom.dto.GroupDto;
+import com.rabiloo.custom.dto.group.GroupDto;
 import com.rabiloo.custom.entity.GroupEntity;
 import com.rabiloo.custom.service.GroupService;
 import org.springframework.web.bind.annotation.*;
@@ -33,4 +33,8 @@ public class GroupResource extends BaseResource<GroupService> {
     }
 
 
+//    @GetMapping("/") DOING
+//    public List<GroupDto> getList() {
+//        return service.getGroupList();
+//    }
 }

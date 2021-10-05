@@ -10,4 +10,5 @@ import java.util.List;
 public interface GroupPolicyRepository extends BaseRepository<GroupPolicyParticipantEntity> {
     List<GroupPolicyParticipantEntity> findByGroupIdInAndIsDeletedFalse(List<Long> groupIds);
     List<GroupPolicyParticipantEntity> findByGroupIdAndIsDeletedFalse(Long policyId);
+    List<GroupPolicyParticipantEntity> findByPermissionIdAndIsDeletedFalse(Long permissionId);
 }

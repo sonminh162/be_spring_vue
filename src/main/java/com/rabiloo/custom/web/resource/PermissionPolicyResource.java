@@ -1,7 +1,8 @@
 package com.rabiloo.custom.web.resource;
 
 import com.rabiloo.base.core.BaseResource;
-import com.rabiloo.custom.entity.PermissionPolicyEntity;
+import com.rabiloo.custom.dto.permission.PermissionPolicyDto;
+import com.rabiloo.custom.entity.permission.PermissionPolicyEntity;
 import com.rabiloo.custom.service.PermissionService;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,10 +13,10 @@ import java.util.UUID;
 @RequestMapping("/policy")
 public class PermissionPolicyResource extends BaseResource<PermissionService> {
 
-//    @GetMapping("/")
-//    public List<PermissionPolicyEntity> permissionList() {
-////        return service.
-//    }
+    @GetMapping("/")
+    public List<PermissionPolicyDto> getPermissionList() {
+        return service.getList();
+    }
 
     @PostMapping("/create")
     public PermissionPolicyEntity createPermissionPolicy(@RequestBody PermissionPolicyEntity permissionPolicyEntity,

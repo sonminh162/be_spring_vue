@@ -8,4 +8,5 @@ import java.util.List;
 public interface UserPolicyRepository extends BaseRepository<UserPolicyParticipantEntity> {
 
     List<UserPolicyParticipantEntity> findAllByUserIdAndIsDeletedFalse(Long userId);
+    List<UserPolicyParticipantEntity> findByPermissionIdAndIsDeletedFalse(Long permissionId);
 }

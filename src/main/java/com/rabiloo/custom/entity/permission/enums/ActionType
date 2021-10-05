@@ -1,0 +1,9 @@
+package com.rabiloo.custom.entity.permission.enums;
+
+import lombok.Getter;
+
+
+@Getter
+public enum ActionType {
+    NOT_BE_SHOWN, ONLY_VIEW, REVISION;
+}

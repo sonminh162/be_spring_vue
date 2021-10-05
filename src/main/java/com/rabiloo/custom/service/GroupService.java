@@ -1,11 +1,13 @@
 package com.rabiloo.custom.service;
 
 import com.rabiloo.base.core.BaseService;
-import com.rabiloo.custom.dto.GroupDto;
+import com.rabiloo.custom.dto.group.GroupDto;
 import com.rabiloo.custom.entity.*;
+import com.rabiloo.custom.entity.user.UserEntity;
 import com.rabiloo.custom.repository.GroupRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -85,33 +87,28 @@ public class GroupService extends BaseService<GroupEntity, GroupRepository> {
     }
 
     public GroupEntity updateAndModifyParticipants(GroupDto requestBody, List<Long> newUserIds, List<Long> permissionIds) {
-        Optional<GroupEntity> updatingGroupOptional = findByIdAndDeletedFalse(requestBody.getId());
-        if(updatingGroupOptional.isPresent()) {
-            GroupEntity updatingGroup = updatingGroupOptional.get();
-
-            if(newUserIds != null) {
-                Set<Long> intersectUserGroupParticipantIds = userGroupService.findAllByGroupId(updatingGroup.getId())
-                        .stream()
-                        .map(UserGroupParticipantEntity::getUserId).collect(Collectors.toSet());
-                intersectUserGroupParticipantIds.retainAll(newUserIds);
-                List<Long> updatingIds = newUserIds.stream().filter(id -> !intersectUserGroupParticipantIds.contains(id)).collect(Collectors.toList());
-                assignPermissionOfGroupToNewUsers(updatingIds, updatingGroup.getId());
-            }
-
-            if(permissionIds != null) {
-                Set<Long> intersectGroupPolicyParticipantIds = groupPolicyService.findByGroupIdAndIsDeletedFalse(updatingGroup.getId())
-                        .stream()
-                        .map(GroupPolicyParticipantEntity::getPolicyId)
-                        .collect(Collectors.toSet());
-                intersectGroupPolicyParticipantIds.retainAll(newUserIds);
-                List<Long> updatingPermissionIds = newUserIds.stream().filter(id -> !intersectGroupPolicyParticipantIds.contains(id)).collect(Collectors.toList());
-                assignNewPermissionToGroup(updatingPermissionIds, updatingGroup.getId());
-                assignNewPermissionToUserOfGroup(updatingPermissionIds, updatingGroup.getId());
-            }
-
-            return getUpdatedAttributesGroup(requestBody, updatingGroup);
+        GroupEntity updatingGroup = findByCodeAndIsDeleteFalse(requestBody.getCode());
+        if(newUserIds != null) {
+            Set<Long> intersectUserGroupParticipantIds = userGroupService.findAllByGroupId(updatingGroup.getId())
+                    .stream()
+                    .map(UserGroupParticipantEntity::getUserId).collect(Collectors.toSet());
+            intersectUserGroupParticipantIds.retainAll(newUserIds);
+            List<Long> updatingIds = newUserIds.stream().filter(id -> !intersectUserGroupParticipantIds.contains(id)).collect(Collectors.toList());
+            assignPermissionOfGroupToNewUsers(updatingIds, updatingGroup.getId());
         }
-        return null;
+
+        if(permissionIds != null) {
+            Set<Long> intersectGroupPolicyParticipantIds = groupPolicyService.findByGroupIdAndIsDeletedFalse(updatingGroup.getId())
+                    .stream()
+                    .map(GroupPolicyParticipantEntity::getPolicyId)
+                    .collect(Collectors.toSet());
+            intersectGroupPolicyParticipantIds.retainAll(newUserIds);
+            List<Long> updatingPermissionIds = newUserIds.stream().filter(id -> !intersectGroupPolicyParticipantIds.contains(id)).collect(Collectors.toList());
+            assignNewPermissionToGroup(updatingPermissionIds, updatingGroup.getId());
+            assignNewPermissionToUserOfGroup(updatingPermissionIds, updatingGroup.getId());
+        }
+
+        return getUpdatedAttributesGroup(requestBody, updatingGroup);
     }
 
     private void assignNewPermissionToGroup(List<Long> updatingPermissionIds, Long groupId) {
@@ -135,6 +132,7 @@ public class GroupService extends BaseService<GroupEntity, GroupRepository> {
         userPolicyService.saveList(updatingEntities);
     }
 
+    @Transactional
     public boolean deleteGroupByCodeAndModifyParticipants(UUID code) {
         GroupEntity deletingGroup = findByCodeAndIsDeleteFalse(code);
         deleteEntity(deletingGroup);
@@ -142,5 +140,9 @@ public class GroupService extends BaseService<GroupEntity, GroupRepository> {
         groupPolicyService.deleteParticipantsByGroupId(deletingGroup.getId());
         return true;
     }
+
+//    public List<GroupDto> getGroupList() {
+//
+//    }
 
 }
